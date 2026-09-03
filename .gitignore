@@ -1,0 +1,14 @@
+# Opencode
+
+AGENTS.md
+
+
+# Python & Django
+venv/
+__pycache__/
+*.pyc
+*.pyo
+.env
+
+# Base de datos local
+db.sqlite3
