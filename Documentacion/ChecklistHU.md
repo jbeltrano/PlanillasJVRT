@@ -9,7 +9,13 @@ Checklist local de seguimiento de las historias de usuario del proyecto Planilla
 > - Usa el campo **Notas** para anotar observaciones, pendientes puntuales o referencias a código.
 
 **Fuente de los criterios:** `Documentacion/HU.md`.
+---
 
+- [ ] **Crear un .env para las contraseñas y conexion con la base de datos**
+- [ ] **Crear la base de datos**
+  - [ ] Crear el diagrama de la base de datos
+  - [ ] Crear el script de la base de datos
+  - [ ] Crear el contenedor docker para pruebas locales en la db
 ---
 
 # Historias de usuario funcionales
