@@ -1,0 +1,26 @@
+# Entorno virtual y artefactos locales (si se envían, el build se vuelve lento)
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+*.sqlite3
+db.sqlite3
+
+# Configuración local y control de versiones
+.env
+.env.*
+.git
+.gitignore
+.gitattributes
+.github/
+
+# Salidas de Django y herramientas
+staticfiles/
+media/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Archivos propios de Docker
+Dockerfile
+.dockerignore

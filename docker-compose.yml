@@ -1,0 +1,82 @@
+services:
+  db:
+    image: postgres:16
+    container_name: JVRT_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  web:
+    build:
+      context: ./Proyecto
+      dockerfile: Dockerfile
+      target: runtime
+    image: planillasjvrt-web:latest
+    container_name: JVRT_web
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DB_HOST: db
+      DB_PORT: "5432"
+    ports:
+      - "${WEB_PORT:-8000}:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8000/admin/login/ || exit 1"]
+      interval: 30s
+      timeout: 5s
+      start_period: 20s
+      retries: 3
+
+  # ----------------------------------------------------------
+  # Túnel rápido de Cloudflare (pruebas desde internet)
+  # URL aleatoria https://<algo>.trycloudflare.com, sin cuenta ni dominio.
+  # Solo arranca bajo demanda:
+  #   docker compose --profile tunnel-quick up -d
+  # ----------------------------------------------------------
+  tunnel-quick:
+    image: cloudflare/cloudflared:2026.11.2
+    container_name: JVRT_tunnel_quick
+    restart: unless-stopped
+    command: tunnel --no-autoupdate --url http://web:8000
+    depends_on:
+      web:
+        condition: service_healthy
+    profiles: ["tunnel-quick"]
+
+  # ----------------------------------------------------------
+  # Túnel con nombre (para cuando exista dominio propio)
+  # Requiere CLOUDFLARE_TUNNEL_TOKEN en .env y un hostname público
+  # configurado en Cloudflare Zero Trust, p. ej.:
+  #   dev.tudominio.com -> http://web:8000
+  # Se arranca con:
+  #   docker compose --profile tunnel up -d
+  # ----------------------------------------------------------
+  tunnel:
+    image: cloudflare/cloudflared:2026.11.2
+    container_name: JVRT_tunnel
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:-}
+    depends_on:
+      web:
+        condition: service_healthy
+    profiles: ["tunnel"]
+
+volumes:
+  pgdata:

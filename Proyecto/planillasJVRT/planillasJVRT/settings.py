@@ -10,22 +10,50 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 
+import os
 from pathlib import Path
+
+from django.core.exceptions import ImproperlyConfigured
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
+def env_bool(name, default=False):
+    """Lee una variable de entorno booleana (1/true/yes/on)."""
+    return os.getenv(name, str(default)).strip().lower() in ('1', 'true', 'yes', 'on')
+
+
+def env_list(name, default=''):
+    """Lee una variable de entorno separada por comas."""
+    return [item.strip() for item in os.getenv(name, default).split(',') if item.strip()]
+
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-h_i!a2!(xm_%159j+@(tzbxpv4&_77cm*wyj2rvqpz6gtz*p48'
-
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env_bool('DJANGO_DEBUG', True)
 
-ALLOWED_HOSTS = []
+# SECURITY WARNING: keep the secret key used in production secret!
+# En producción (DEBUG=False) es obligatorio definir DJANGO_SECRET_KEY.
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY') or (
+    'django-insecure-h_i!a2!(xm_%159j+@(tzbxpv4&_77cm*wyj2rvqpz6gtz*p48' if DEBUG else None
+)
+if not SECRET_KEY:
+    raise ImproperlyConfigured(
+        'La variable de entorno DJANGO_SECRET_KEY es obligatoria cuando DJANGO_DEBUG=0.'
+    )
+
+ALLOWED_HOSTS = env_list('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1')
+
+# Cloudflare Tunnel (y cualquier proxy inverso) termina TLS y reenvía HTTP,
+# por eso hay que indicarle a Django que la petición original era HTTPS.
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Orígenes aceptados para peticiones POST (login del admin, formularios).
+# Necesario para servir la app a través del túnel: https://*.trycloudflare.com
+CSRF_TRUSTED_ORIGINS = env_list('DJANGO_CSRF_TRUSTED_ORIGINS', '')
 
 
 # Application definition
@@ -41,6 +69,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -74,8 +103,14 @@ WSGI_APPLICATION = 'planillasJVRT.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('POSTGRES_DB', 'app_db'),
+        'USER': os.getenv('POSTGRES_USER', 'admin'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD', ''),
+        'HOST': os.getenv('DB_HOST', 'localhost'),
+        'PORT': os.getenv('DB_PORT', '5432'),
+        # Reutiliza conexiones abiertas para evitar el coste de conectar en cada request.
+        'CONN_MAX_AGE': int(os.getenv('DB_CONN_MAX_AGE', '60')),
     }
 }
 
@@ -115,6 +150,19 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.1/howto/static-files/
 
 STATIC_URL = 'static/'
+
+# Directorio donde collectstatic deja los archivos para que los sirva Whitenoise.
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# Compresión en tiempo de collectstatic y servido directo desde gunicorn.
+STORAGES = {
+    'default': {
+        'BACKEND': 'django.core.files.storage.FileSystemStorage',
+    },
+    'staticfiles': {
+        'BACKEND': 'whitenoise.storage.CompressedStaticFilesStorage',
+    },
+}
 
 
 # Email
