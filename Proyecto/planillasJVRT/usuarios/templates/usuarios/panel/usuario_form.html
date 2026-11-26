@@ -1,0 +1,12 @@
+{% extends 'usuarios/base.html' %}
+
+{% block titulo %}Crear usuario · PlanillasJVRT{% endblock %}
+
+{% block contenido %}
+<h1>Crear usuario</h1>
+<form method="post" action="{% url 'usuarios:usuario_crear' %}">
+  {% csrf_token %}
+  {% include 'usuarios/_formulario.html' %}
+  <button type="submit">Crear usuario</button>
+</form>
+{% endblock %}

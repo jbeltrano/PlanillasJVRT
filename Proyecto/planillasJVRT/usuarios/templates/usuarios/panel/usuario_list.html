@@ -1,0 +1,27 @@
+{% extends 'usuarios/base.html' %}
+
+{% block titulo %}Usuarios · PlanillasJVRT{% endblock %}
+
+{% block contenido %}
+<h1>Usuarios</h1>
+<p><a class="boton" href="{% url 'usuarios:usuario_crear' %}">Crear usuario</a></p>
+<div style="overflow-x: auto;">
+<table>
+  <thead>
+    <tr><th>Nombre</th><th>Tipo</th><th>Activo</th><th>Fecha de alta</th></tr>
+  </thead>
+  <tbody>
+    {% for usuario in usuarios %}
+    <tr>
+      <td>{{ usuario.username }}</td>
+      <td>{{ usuario.get_tipo_usuario_display }}</td>
+      <td>{{ usuario.is_active|yesno:"Sí,No" }}</td>
+      <td>{{ usuario.date_joined|date:"d/m/Y H:i" }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="4">No hay usuarios registrados.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}

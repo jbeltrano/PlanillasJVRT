@@ -1,0 +1,9 @@
+{% extends 'usuarios/base.html' %}
+
+{% block titulo %}Acceso denegado · PlanillasJVRT{% endblock %}
+
+{% block contenido %}
+<h1>Acceso denegado</h1>
+<p>No tienes permisos para ver esta página. Solo el administrador puede gestionar usuarios.</p>
+<p><a href="{% url 'usuarios:inicio' %}">Volver al inicio</a></p>
+{% endblock %}

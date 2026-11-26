@@ -28,9 +28,9 @@ docker compose down               # detiene los contenedores (conserva la base d
 docker compose down -v            # detiene y borra también el volumen de PostgreSQL
 ```
 
-La aplicación queda disponible en <http://localhost:8000/admin/> (o el puerto indicado
-en `WEB_PORT`). Al arrancar, el contenedor `web` aplica las migraciones y recolecta los
-archivos estáticos automáticamente.
+La aplicación queda disponible en <http://localhost:8000/cuentas/login/> (o el puerto indicado
+en `WEB_PORT`). Al arrancar, el contenedor `web` aplica las migraciones, crea el administrador
+inicial si no existe y recolecta los archivos estáticos automáticamente.
 
 ### Rebuilds rápidos
 
@@ -76,10 +76,8 @@ docker compose stop tunnel-quick
 rápido funciona sin tocar configuración. (En `ALLOWED_HOSTS` el comodín de subdominios
 se escribe con punto inicial: `.trycloudflare.com`.)
 
-> El túnel rápido **no tiene autenticación**: cualquiera con la URL accede a la
-> aplicación. Úsalo en sesiones cortas y no lo dejes corriendo de forma permanente.
-> El admin de Django queda expuesto, así que usa una contraseña fuerte
-> (`docker compose exec web python manage.py createsuperuser`).
+> El túnel rápido expone la página de inicio de sesión a internet. Úsalo en sesiones
+> cortas y no lo dejes corriendo de forma permanente. Usa una contraseña de administrador fuerte.
 
 > **Si el túnel no conecta** y en los logs aparecen errores como
 > `Failed to dial a quic connection`, `HTTP/2 connection is blocked` o
@@ -110,3 +108,42 @@ se escribe con punto inicial: `.trycloudflare.com`.)
 Opcionalmente se puede añadir una política de **Cloudflare Access** (por ejemplo,
 OTP por correo) para que solo los invitados puedan entrar al entorno de pruebas.
 
+## Usuarios y administrador
+
+El módulo `usuarios` reemplaza la autenticación por defecto de Django. La tabla `usuario`
+sigue el diseño de `db/init_script.sql`: `nombre`, `contraseña` y `tipo_usuario`
+(`administrador` o `usuario`). No hay panel de Django; la gestión se hace en la aplicación.
+
+### Administrador inicial
+
+Al arrancar, `entrypoint.sh` ejecuta `python manage.py crear_admin_inicial`, que toma estas
+variables del `.env`:
+
+```env
+DJANGO_ADMIN_USERNAME=admin
+DJANGO_ADMIN_PASSWORD=cambia_esta_clave_por_una_segura
+```
+
+- Si el usuario ya existe, el comando **no lo modifica**; así no se revierte una contraseña
+  cambiada desde la aplicación.
+- `DJANGO_ADMIN_PASSWORD` es obligatoria la primera vez. Sin ella (o si no cumple los
+  validadores de contraseña) el contenedor no arranca.
+
+### Rutas
+
+| Ruta | Descripción | Acceso |
+|------|-------------|--------|
+| `/cuentas/login/` | Inicio de sesión | Público |
+| `/cuentas/logout/` | Cerrar sesión | Autenticado |
+| `/cuentas/password/` | Cambiar la contraseña propia | Autenticado |
+| `/panel/` | Panel de administración | Administrador |
+| `/panel/usuarios/` | Listado de usuarios | Administrador |
+| `/panel/usuarios/nuevo/` | Crear cuenta de usuario | Administrador |
+
+Los usuarios sin rol de administrador que intenten entrar al panel reciben `403`.
+
+### Pruebas
+
+```bash
+docker compose exec web python manage.py test usuarios
+```

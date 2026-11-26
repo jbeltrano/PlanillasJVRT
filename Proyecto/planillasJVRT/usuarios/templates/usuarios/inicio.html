@@ -1,0 +1,7 @@
+{% extends 'usuarios/base.html' %}
+
+{% block contenido %}
+<h1>Bienvenido, {{ user.username }}</h1>
+<p>Has iniciado sesión como <strong>{{ user.get_tipo_usuario_display }}</strong>.</p>
+<p><a class="boton" href="{% url 'usuarios:password_cambiar' %}">Cambiar mi contraseña</a></p>
+{% endblock %}

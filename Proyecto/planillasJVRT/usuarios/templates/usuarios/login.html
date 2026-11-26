@@ -1,0 +1,13 @@
+{% extends 'usuarios/base.html' %}
+
+{% block titulo %}Iniciar sesión · PlanillasJVRT{% endblock %}
+
+{% block contenido %}
+<h1>Iniciar sesión</h1>
+<form method="post" action="{% url 'usuarios:login' %}">
+  {% csrf_token %}
+  {% include 'usuarios/_formulario.html' %}
+  <input type="hidden" name="next" value="{{ next }}">
+  <button type="submit">Ingresar</button>
+</form>
+{% endblock %}

@@ -11,11 +11,11 @@ Checklist local de seguimiento de las historias de usuario del proyecto Planilla
 **Fuente de los criterios:** `Documentacion/HU.md`.
 ---
 
-- [ ] **Crear un .env para las contraseñas y conexion con la base de datos**
-- [ ] **Crear la base de datos**
-  - [ ] Crear el diagrama de la base de datos
-  - [ ] Crear el script de la base de datos
-  - [ ] Crear el contenedor docker para pruebas locales en la db
+- [x] **Crear un .env para las contraseñas y conexion con la base de datos**
+- [x] **Crear la base de datos**
+  - [x] Crear el diagrama de la base de datos
+  - [x] Crear el script de la base de datos
+  - [x] Crear el contenedor docker para pruebas locales en la db
 ---
 
 # Historias de usuario funcionales
@@ -23,6 +23,7 @@ Checklist local de seguimiento de las historias de usuario del proyecto Planilla
 ## HU-001 — Visualización de un extracto al escanear el QR
 
 **Rol:** General (visitante)
+
 **Como** General, **quiero** escanear el QR de un extracto y ver toda su información en el navegador, **para** consultar los datos sin autenticarme.
 
 - [ ] **HU-001 implementada**
@@ -55,13 +56,16 @@ Checklist local de seguimiento de las historias de usuario del proyecto Planilla
 **Rol:** Administrador
 **Como** Administrador, **quiero** contar con un único usuario y contraseña que funcionen como administrador, **para** dar acceso a los demás usuarios.
 
-- [ ] **HU-003 implementada**
-  - [ ] El sistema cuenta con un usuario administrador preconfigurado.
-  - [ ] El administrador puede crear cuentas para otros usuarios.
-  - [ ] El administrador puede cambiar su propia contraseña.
+- [x] **HU-003 implementada**
+  - [x] El sistema cuenta con un usuario administrador preconfigurado.
+  - [x] El administrador puede crear cuentas para otros usuarios.
+  - [x] El administrador puede cambiar su propia contraseña.
 
 **Notas:**
-- [ ]
+- Implementado en la app `Proyecto/planillasJVRT/usuarios` (modelo `Usuario` sobre la tabla `usuario`, con `tipo_usuario`).
+- Administrador inicial: comando `crear_admin_inicial`, ejecutado por `entrypoint.sh` con `DJANGO_ADMIN_*`.
+- Panel en `/panel/`; login en `/cuentas/login/`. No se usa el admin de Django.
+- Pruebas: `python manage.py test usuarios` (23 pruebas).
 
 ---
 

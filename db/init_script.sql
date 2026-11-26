@@ -1,11 +1,13 @@
 CREATE TABLE "usuario" (
-  "id" varchar,
-  "nombre" varchar,
-  "contraseña" varchar
+  "nombre" varchar NOT NULL UNIQUE,
+  "contraseña" varchar NOT NULL,
+  "tipo_usuario" varchar NOT NULL DEFAULT 'usuario',
+  CONSTRAINT "usuario_tipo_usuario_valido"
+    CHECK ("tipo_usuario" IN ('administrador', 'usuario'))
 );
 
 CREATE TABLE "registro_extracto" (
-  "usuario_id" varchar,
+  "nombre_usuario" varchar,
   "extracto_id" varchar,
   "fecha_registro" datetime DEFAULT 'now'
 );
@@ -50,7 +52,7 @@ CREATE TABLE "extracto" (
   "responsable_id" varchar NOT NULL
 );
 
-ALTER TABLE "registro_extracto" ADD FOREIGN KEY ("usuario_id") REFERENCES "usuario" ("id") DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE "registro_extracto" ADD FOREIGN KEY ("nombre_usuario") REFERENCES "usuario" ("nombre") DEFERRABLE INITIALLY IMMEDIATE;
 
 ALTER TABLE "registro_extracto" ADD FOREIGN KEY ("extracto_id") REFERENCES "extracto" ("id") DEFERRABLE INITIALLY IMMEDIATE;
 

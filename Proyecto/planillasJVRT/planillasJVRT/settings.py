@@ -59,13 +59,21 @@ CSRF_TRUSTED_ORIGINS = env_list('DJANGO_CSRF_TRUSTED_ORIGINS', '')
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'usuarios',
 ]
+
+# Modelo de usuario propio (tabla `usuario` del diseño en db/init_script.sql).
+AUTH_USER_MODEL = 'usuarios.Usuario'
+
+# Autenticación y redirecciones del módulo de cuentas.
+LOGIN_URL = 'usuarios:login'
+LOGIN_REDIRECT_URL = 'usuarios:inicio'
+LOGOUT_REDIRECT_URL = 'usuarios:login'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -137,7 +145,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/6.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'es'
 
 TIME_ZONE = 'UTC'
 

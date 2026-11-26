@@ -1,0 +1,12 @@
+{% extends 'usuarios/base.html' %}
+
+{% block titulo %}Panel de administración · PlanillasJVRT{% endblock %}
+
+{% block contenido %}
+<h1>Panel de administración</h1>
+<p>Usuarios registrados: <strong>{{ total_usuarios }}</strong></p>
+<p>
+  <a class="boton" href="{% url 'usuarios:usuario_list' %}">Ver usuarios</a>
+  <a class="boton" href="{% url 'usuarios:usuario_crear' %}">Crear usuario</a>
+</p>
+{% endblock %}
