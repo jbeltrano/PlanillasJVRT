@@ -34,6 +34,7 @@ class Usuario(AbstractBaseUser):
         error_messages={'unique': 'Ya existe un usuario con este nombre.'},
         db_column='nombre',
     )
+
     password = models.CharField('contraseña', max_length=128, db_column='contraseña')
     tipo_usuario = models.CharField(
         'tipo de usuario',
@@ -41,6 +42,7 @@ class Usuario(AbstractBaseUser):
         choices=TipoUsuario.choices,
         default=TipoUsuario.USUARIO,
     )
+
     is_active = models.BooleanField('activo', default=True)
     date_joined = models.DateTimeField('fecha de alta', default=timezone.now)
 
